@@ -1,5 +1,60 @@
 # CarND-Path-Planning-Project
 Self-Driving Car Engineer Nanodegree Program
+
+## Project Model Documentation
+
+### Project structure
+
+During project implementation was used following architecture:
+- class "**Car**" - for storing current state of the car, including position and speed
+- class "**PathPlanner**" - for building environment and making decision of maneveur (keep lane or change lane to left/right), based on environment 
+  
+### Path Planning Rules
+
+In **PathPlanner** are realized following general rules, which are basic for most countries on motorways:
+1. Every car should drive as most right as possible.
+2. Passing of slower cars is allowed only from left side.
+
+Based on these rules the following state-based mashine is implemented (for three different approaches, which differs one from other):
+1. Driving in most left lane:
+	- Independend from collision (passing from right side is forbidden):
+		- keep lane (slow down if there is a collision) or take right lane if there is free enough space (distance to cars in front and back)
+2. Driving in most right lane:
+	- No collision:
+		- keep lane 
+	- Collision (slow car in front):
+		- keep lane and slow down or take left lane if there is free enough space (distance to cars in front and back)
+3. Driving in any middle lane:
+	- No collision:
+		- keep lane or take right lane if there is free enough space (distance to cars in front and back) 
+	- Collision (slow car in front):
+		- keep lane and slow down or take left lane if there is free enough space (distance to cars in front and back)
+
+Based on state-machine above are evaluated costs for each of possible state (`KEEP_LANE, CHANGE_TO_LEFT, CHANGE_TO_RIGHT`) in method `PathPlanner::evaluate_costs`.
+To avoid sharp changes in behavior, all costs are averaged for N (by default - 10) last iterations.
+
+Based on evaluated costs is selected the state with minimal cost and based on that - next lane for car in method `PathPlanner::next_lane`. Evaluating of costs is possible only by reaching minimal speed to avoid maneveurs at start of track.
+
+### Car behavior
+
+#### Position on road
+
+Driving lane is evaluating in `PathPlanner` as described above.
+
+#### Speed
+
+Speed is also evaluating in `PathPlanner` as follows:
+- no collision - speed is equal to given speed limit (50 MPH) minus some threshold
+- collision - speed is equal to speed of the car ahead 
+
+
+### Car trajectory
+
+After evaluating of next lane and speed for car in "**main**" is implemented the portion of next points using `spline.h` like in video of project walkthrough. 
+
+---
+
+## Project Instructions
    
 ### Simulator.
 You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases).
